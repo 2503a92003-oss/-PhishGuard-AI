@@ -1,0 +1,4 @@
+Flask>=3.0
+# Optional machine-learning layer (only needed for train_model.py and model.joblib)
+scikit-learn>=1.4
+joblib>=1.3

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}Report: {{ inv.title }}{% endblock %}
+{% block content %}
+<article class="report">
+  <div class="row no-print"><a href="{{ url_for('investigation', inv_id=inv.id) }}">Back to investigation</a><button class="btn" type="button" data-print>Print or save as PDF</button></div>
+  <h1>Investigation report: {{ inv.title }}</h1>
+  <dl class="facts">
+    <dt>Status</dt><dd>{{ inv.status }}</dd>
+    <dt>Opened</dt><dd>{{ inv.created_at }} UTC</dd>
+    <dt>Report generated</dt><dd>{{ generated }} UTC</dd>
+    <dt>Scans</dt><dd>{{ scans|length }} ({{ counts.High }} high, {{ counts.Medium }} medium, {{ counts.Low }} low)</dd>
+  </dl>
+  {% if inv.notes %}<h2>Analyst notes</h2><p class="notes">{{ inv.notes }}</p>{% endif %}
+  <h2>Findings</h2>
+  {% for s, d in scans %}
+  <section class="item">
+    <h3>Scan {{ s.id }}: {{ badge(s.level) }} <span class="score">{{ s.score }}/100</span></h3>
+    <p class="meta">{{ s.created_at }} UTC, {{ {'url': 'link', 'email': 'email', 'message': 'message'}[s.kind] }}</p>
+    <pre class="marked">{{ s.content|defang if s.kind == 'url' else s.content|defang_text }}</pre>
+    {% if d.findings %}<ul class="plain">{% for f in d.findings %}<li><strong>{{ f.title }}</strong> (+{{ f.points }}). {{ f.detail }}</li>{% endfor %}</ul>{% else %}<p>No warning signs matched.</p>{% endif %}
+  </section>
+  {% else %}
+  <p class="empty">No scans have been filed under this investigation.</p>
+  {% endfor %}
+  <p class="note">Links are shown defanged. Automated scoring is a guide, not proof; confirm high-risk items with the sender or the organisation named.</p>
+</article>
+{% endblock %}

@@ -1,0 +1,2 @@
+{% macro badge(level) %}<span class="badge {{ level|lower }}">{{ level }} risk</span>{% endmacro %}
+{% macro csrf() %}<input type="hidden" name="_csrf" value="{{ csrf_token() }}">{% endmacro %}

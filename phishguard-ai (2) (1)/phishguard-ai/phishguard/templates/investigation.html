@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, csrf %}
+{% block title %}{{ inv.title }} - PhishGuard AI{% endblock %}
+{% block content %}
+<h1>{{ inv.title }}</h1>
+<p class="meta">Opened {{ inv.created_at }} UTC. Last updated {{ inv.updated_at }} UTC.</p>
+<form method="post" action="{{ url_for('update_investigation', inv_id=inv.id) }}" class="stack">
+  {{ csrf() }}
+  <label for="title">Title</label>
+  <input id="title" name="title" value="{{ inv.title }}" maxlength="120" required>
+  <label for="status">Status</label>
+  <select id="status" name="status">{% for s in statuses %}<option {{ 'selected' if s == inv.status }}>{{ s }}</option>{% endfor %}</select>
+  <label for="notes">Notes</label>
+  <textarea id="notes" name="notes" rows="6" maxlength="5000">{{ inv.notes }}</textarea>
+  <div class="row"><button class="btn" type="submit">Save changes</button>
+  <a class="btn ghost" href="{{ url_for('report', inv_id=inv.id) }}">Open report</a></div>
+</form>
+<h2>Scans in this investigation</h2>
+{% if scans %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>When (UTC)</th><th>Content</th><th>Risk</th><th>Score</th></tr></thead>
+    <tbody>{% for s in scans %}
+      <tr><td>{{ s.created_at }}</td><td><a href="{{ url_for('scan_detail', scan_id=s.id) }}">{{ s|preview }}</a></td><td>{{ badge(s.level) }}</td><td>{{ s.score }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty">No scans yet. Open a scan result and choose this investigation to file it here.</p>
+{% endif %}
+{% endblock %}

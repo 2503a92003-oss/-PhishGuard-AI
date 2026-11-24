@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, csrf %}
+{% block title %}History - PhishGuard AI{% endblock %}
+{% block content %}
+<h1>Scan history</h1>
+<form class="filters" method="get">
+  <label for="q">Search</label>
+  <input id="q" name="q" value="{{ q }}" placeholder="Words from the message or link">
+  <label for="level">Risk</label>
+  <select id="level" name="level">
+    <option value="">All</option>
+    {% for lv in ['High', 'Medium', 'Low'] %}<option {{ 'selected' if level == lv }}>{{ lv }}</option>{% endfor %}
+  </select>
+  <button class="btn ghost" type="submit">Filter</button>
+  <a class="btn ghost" href="{{ url_for('export_csv') }}">Export CSV</a>
+</form>
+<form method="post" action="{{ url_for('clear_history') }}" data-confirm="Clear all scan history? This can't be undone.">
+  {{ csrf() }}
+  <button class="danger" type="submit"{% if row_count == 0 %} disabled{% endif %}>Clear history</button>
+</form>
+{% if rows %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>When (UTC)</th><th>Content</th><th>Risk</th><th>Score</th></tr></thead>
+    <tbody>
+      {% for s in rows %}
+      <tr>
+        <td>{{ s.created_at }}</td>
+        <td><a href="{{ url_for('scan_detail', scan_id=s.id) }}">{{ s|preview }}</a></td>
+        <td>{{ badge(s.level) }}</td>
+        <td>{{ s.score }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty">No scans match. <a href="{{ url_for('index') }}">Scan something</a> or clear the filters.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, csrf %}
+{% block title %}Investigations - PhishGuard AI{% endblock %}
+{% block content %}
+<h1>Investigations</h1>
+<p class="lede">Group related scans, keep notes, and produce a report.</p>
+<form method="post" class="stack">
+  {{ csrf() }}
+  <label for="title">New investigation</label>
+  <input id="title" name="title" maxlength="120" required placeholder="e.g. Fake payroll emails, October">
+  <label for="notes">Notes</label>
+  <textarea id="notes" name="notes" rows="3" maxlength="5000"></textarea>
+  <button class="btn" type="submit">Create investigation</button>
+</form>
+{% if rows %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Title</th><th>Status</th><th>Scans</th><th>Highest risk</th><th>Updated (UTC)</th></tr></thead>
+    <tbody>
+      {% for i in rows %}
+      <tr>
+        <td><a href="{{ url_for('investigation', inv_id=i.id) }}">{{ i.title }}</a></td>
+        <td>{{ i.status }}</td><td>{{ i.scan_count }}</td>
+        <td>{% if i.scan_count %}{{ badge(level_for(i.top_score)) }}{% else %}None yet{% endif %}</td>
+        <td>{{ i.updated_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty">No investigations yet. Create one above, or file a scan from its result page.</p>
+{% endif %}
+{% endblock %}
